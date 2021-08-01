@@ -1,24 +1,21 @@
-import logo from './logo.svg';
-import './App.css';
-
+import "./App.css";
+import React from "react";
+import { Helmet, HelmetProvider } from "react-helmet-async";
 function App() {
+  const API_KEY = `${process.env.REACT_APP_GOOGLE_API_KEY}`;
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <HelmetProvider>
+      <Helmet>
+        <script
+          src={
+            "https://maps.googleapis.com/maps/api/js?key=" +
+            API_KEY +
+            "&callback=initAutocomplete&libraries=places&v=weekly"
+          }
+        />
+      </Helmet>
+    </HelmetProvider>
   );
 }
 

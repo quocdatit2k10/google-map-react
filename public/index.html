@@ -1,43 +1,406 @@
-<!DOCTYPE html>
-<html lang="en">
+<html>
   <head>
+    <title>HOW FAR CAN WE GO</title>
     <meta charset="utf-8" />
     <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#000000" />
-    <meta
-      name="description"
-      content="Web site created using create-react-app"
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css"
     />
-    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
-    <!--
-      manifest.json provides metadata used when your web app is installed on a
-      user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
-    -->
-    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-    <!--
-      Notice the use of %PUBLIC_URL% in the tags above.
-      It will be replaced with the URL of the `public` folder during the build.
-      Only files inside the `public` folder can be referenced from the HTML.
 
-      Unlike "/favicon.ico" or "favicon.ico", "%PUBLIC_URL%/favicon.ico" will
-      work correctly both with client-side routing and a non-root public URL.
-      Learn how to configure a non-root public URL by running `npm run build`.
-    -->
-    <title>React App</title>
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"
+    />
   </head>
   <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
-    <div id="root"></div>
-    <!--
-      This HTML file is a template.
-      If you open it directly in the browser, you will see an empty page.
+    <div class="header">
+      <h3 class="h3">HOW FAR CAN WE GO</h3>
+    </div>
 
-      You can add webfonts, meta tags, or analytics to this file.
-      The build step will place the bundled scripts into the <body> tag.
+    <div class="col-75">
+      <select
+        class="form-control form-control-inline"
+        aria-label=".form-select-lg example"
+        name="buildings"
+        id="selectBox"
+        onchange="changeFunc(value);"
+      >
+        <option value="100">100 m</option
+        ><option value="200">200 m</option
+        ><option value="300">300 m</option
+        ><option value="400">400 m</option
+        ><option value="500">500 m</option
+        ><option value="1000">1 km</option
+        ><option value="2000">2 km</option
+        ><option value="3000">3 km</option
+        ><option value="4000">4 km</option
+        ><option value="5000" selected>5 km</option
+        ><option value="6000">6 km</option
+        ><option value="7000">7 km</option
+        ><option value="8000">8 km</option
+        ><option value="9000">9 km</option
+        ><option value="10000">10 km</option
+        ><option value="15000">15 km</option
+        ><option value="20000">20 km</option
+        ><option value="25000">25 km</option
+        ><option value="30000">30 km</option
+        ><option value="35000">35 km</option
+        ><option value="40000">40 km</option>
+      </select>
+    </div>
 
-      To begin the development, run `npm start` or `yarn start`.
-      To create a production bundle, use `npm run build` or `yarn build`.
-    -->
+    <input
+      id="pac-input"
+      class="form-control"
+      type="search"
+      placeholder="Home"
+    />
+    <input
+      id="pac-input2"
+      class="form-control"
+      type="search"
+      placeholder="Destination"
+    />
+
+    <!--Main layout-->
+    <main class=" m-0 p-0">
+      <!--Google map-->
+      <div id="map-container-google-4" class="z-depth-1-half map-container-4">
+        <div id="map"></div>
+        <div id="mapapi"></div>
+      </div>
+    </main>
+    <div class="footer">
+      <p>©2021 - Made by Dat Nguyen</p>
+    </div>
+    <script>
+      let map;
+      let input;
+      let searchBox;
+      let circle;
+      let places = null;
+      let placeCenter = null;
+      let raidus;
+      let markerCenter;
+      let markers = [];
+
+      const arr = {
+        100: 15,
+        200: 15,
+        300: 15,
+        400: 15,
+        500: 15,
+        1000: 14,
+        2000: 13,
+        3000: 13,
+        4000: 13,
+        5000: 12,
+        6000: 12,
+        7000: 11,
+        8000: 11,
+        9000: 11,
+        10000: 11,
+        15000: 10,
+        20000: 10,
+        25000: 10,
+        30000: 9,
+        35000: 9,
+        40000: 9
+      };
+
+      function initAutocomplete() {
+        map = new google.maps.Map(document.getElementById("map"), {
+          center: { lat: -37.7473415, lng: 145.0145453 },
+          zoom: 9,
+          mapTypeId: "roadmap",
+          mapTypeControl: false,
+          gestureHandling: "cooperative",
+          fullscreenControl: false
+        });
+
+        map.controls[google.maps.ControlPosition.TOP_LEFT].push(
+          document.getElementsByName("buildings")[0]
+        );
+
+        // Create the search box and link it to the UI element.
+        input = document.getElementById("pac-input");
+        searchBox = new google.maps.places.SearchBox(input);
+        map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
+
+        const input2 = document.getElementById("pac-input2");
+        const searchBox2 = new google.maps.places.SearchBox(input2);
+        map.controls[google.maps.ControlPosition.TOP_LEFT].push(input2);
+
+        // Bias the SearchBox results towards current map's viewport.
+        map.addListener("bounds_changed", () => {
+          searchBox.setBounds(map.getBounds());
+        });
+
+        // Listen for the event fired when the user selects a prediction and retrieve
+        // more details for that place.
+        searchBox.addListener("places_changed", () => {
+          raidus = document.getElementById("selectBox").value;
+          places = searchBox.getPlaces();
+
+          if (places.length == 0) {
+            return;
+          }
+          // Clear out the old markers.
+          markers.forEach(marker => {
+            marker.setMap(null);
+          });
+
+          // markers = [];
+          // For each place, get the icon, name and location.
+          const bounds = new google.maps.LatLngBounds();
+          places.forEach(place => {
+            if (!place.geometry || !place.geometry.location) {
+              console.log("Returned place contains no geometry");
+              return;
+            }
+            const icon = {
+              // url: place.icon,
+              size: new google.maps.Size(71, 71),
+              origin: new google.maps.Point(0, 0),
+              anchor: new google.maps.Point(17, 34),
+              scaledSize: new google.maps.Size(25, 25)
+            };
+            // Clear out the old markers.
+            if (markerCenter != null) markerCenter.setMap(null);
+            placeCenter = place.geometry.location;
+            markerCenter = new google.maps.Marker({
+              position: place.geometry.location,
+              title: place.name,
+              label: "1",
+              map: map,
+              draggable: true
+            });
+
+            if (circle != null) circle.setMap(null);
+            circle = new google.maps.Circle({
+              map: map,
+              zoom: 7,
+              clickable: false,
+              // metres
+              radius: parseInt(raidus),
+              fillColor: "rgb(51, 136, 255)",
+              fillOpacity: 0.35,
+              strokeColor: "rgb(51, 136, 255)",
+              strokeOpacity: 0.8,
+              strokeWeight: 2
+            });
+
+            // attach circle to marker
+            circle.bindTo("center", markerCenter, "position");
+
+            if (place.geometry.viewport) {
+              // Only geocodes have viewport.
+              bounds.union(place.geometry.viewport);
+            } else {
+              bounds.extend(place.geometry.location);
+            }
+          });
+          map.fitBounds(bounds);
+          map.setZoom(arr[raidus]);
+          // map.circle.setRadius(500);
+        });
+
+        // Bias the SearchBox results towards current map's viewport.
+        map.addListener("bounds_changed", () => {
+          searchBox2.setBounds(map.getBounds());
+        });
+        let markers2 = [];
+        searchBox2.addListener("places_changed", () => {
+          const places2 = searchBox2.getPlaces();
+          raidus = document.getElementById("selectBox").value;
+
+          if (places2.length == 0) {
+            return;
+          }
+          // Clear out the old markers.
+          markers2.forEach(marker => {
+            marker.setMap(null);
+          });
+          // markers = [];
+          // For each place, get the icon, name and location.
+          const bounds = new google.maps.LatLngBounds();
+          places2.forEach(place => {
+            if (!place.geometry || !place.geometry.location) {
+              console.log("Returned place contains no geometry");
+              return;
+            }
+            const icon = {
+              // url: place.icon,
+              size: new google.maps.Size(71, 71),
+              origin: new google.maps.Point(0, 0),
+              anchor: new google.maps.Point(17, 34),
+              scaledSize: new google.maps.Size(25, 25)
+            };
+            // Create a marker for each place.
+            markers2.push(
+              new google.maps.Marker({
+                map,
+                title: place.name,
+                position: place.geometry.location,
+                label: "2"
+              })
+            );
+
+            if (place.geometry.viewport) {
+              // Only geocodes have viewport.
+              bounds.union(place.geometry.viewport);
+            } else {
+              bounds.extend(place.geometry.location);
+            }
+          });
+          map.fitBounds(bounds);
+          if (placeCenter != null) {
+            map.setCenter(placeCenter);
+            map.setZoom(arr[raidus]);
+          }
+        });
+      }
+
+      // Change radius
+      function changeFunc(value) {
+        console.log(searchBox);
+        if (places != null) {
+          if (circle != null) circle.setMap(null);
+          circle = new google.maps.Circle({
+            map: map,
+            zoom: 7,
+            clickable: false,
+            // metres
+            radius: parseInt(value),
+            fillColor: "rgb(51, 136, 255)",
+            fillOpacity: 0.35,
+            strokeColor: "rgb(51, 136, 255)",
+            strokeOpacity: 0.8,
+            strokeWeight: 2
+          });
+          // attach circle to marker
+          circle.bindTo("center", markerCenter, "position");
+          map.setZoom(arr[value]);
+        }
+      }
+    </script>
+
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+      }
+      html,
+      body,
+      #map {
+        height: 100%;
+        font-family: Arial, sans-serif;
+        font-size: 0.9em;
+        color: #fff;
+      }
+      html {
+        font-family: "Lucida Sans", sans-serif;
+      }
+
+      .header {
+        background-color: #059edf;
+        color: #ffffff;
+        padding: 1px;
+        text-align: center;
+        height: 6%;
+      }
+      .h3 {
+        margin-top: 10px !important;
+      }
+
+      .z-depth-1-half {
+        height: 92%;
+      }
+
+      .footer {
+        background-color: #0099cc;
+        color: #ffffff;
+        text-align: center;
+        font-size: 10px;
+        padding: 2px;
+        height: 2%;
+      }
+      input[type="search"]::-webkit-search-cancel-button {
+        -webkit-appearance: searchfield-cancel-button;
+      }
+      @media only screen and (min-width: 350px) {
+        /* For tablets: */
+
+        .form-control {
+          background-color: #fff;
+          font-family: Roboto;
+          font-size: 10px;
+          font-weight: 500;
+          margin-left: 2px;
+          padding: 0 7px 0 5px;
+          text-overflow: ellipsis;
+          width: 37%;
+          color: black;
+        }
+
+        .form-control:focus {
+          border-color: #4d90fe;
+        }
+
+        .form-control-inline {
+          width: 23% !important;
+          font-size: 13px !important;
+        }
+
+        input[type="search"]::-webkit-search-cancel-button {
+          /* Remove default */
+          -webkit-appearance: none;
+
+          /* Now your own custom styles */
+          height: 14px;
+          width: 14px;
+          display: block;
+          background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAeCAYAAAA7MK6iAAAAn0lEQVR42u3UMQrDMBBEUZ9WfQqDmm22EaTyjRMHAlM5K+Y7lb0wnUZPIKHlnutOa+25Z4D++MRBX98MD1V/trSppLKHqj9TTBWKcoUqffbUcbBBEhTjBOV4ja4l4OIAZThEOV6jHO8ARXD+gPPvKMABinGOrnu6gTNUawrcQKNCAQ7QeTxORzle3+sDfjJpPCqhJh7GixZq4rHcc9l5A9qZ+WeBhgEuAAAAAElFTkSuQmCC);
+          /* setup all the background tweaks for our custom icon */
+          background-repeat: no-repeat;
+
+          /* icon size */
+          background-size: 14px;
+        }
+
+        input {
+          -webkit-appearance: searchfield;
+        }
+
+        *::-webkit-search-cancel-button {
+          -webkit-appearance: searchfield-cancel-button;
+        }
+      }
+      @media only screen and (min-width: 800px) {
+        /* For desktop: */
+
+        .form-control {
+          background-color: #fff;
+          font-family: Roboto;
+          font-size: 15px;
+          font-weight: 500;
+          margin-left: 12px;
+          padding: 0 11px 0 13px;
+          text-overflow: ellipsis;
+          width: 400px;
+          color: black;
+        }
+
+        .form-control:focus {
+          border-color: #4d90fe;
+        }
+
+        .form-control-inline {
+          width: 100px !important;
+        }
+      }
+    </style>
   </body>
 </html>
