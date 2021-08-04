@@ -3,6 +3,49 @@
     <title>HOW FAR CAN WE GO</title>
     <meta charset="utf-8" />
     <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+    />
+    <meta http-equiv="content-language" content="en-ie" />
+
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://www.howfarcanwego.one" />
+    <link href="https://www.howfarcanwego.one" rel="canonical" />
+    <meta property="og:title" content="How far can we go" />
+    <meta
+      property="og:description"
+      content="How far can we go from home during restrictions?"
+    />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="5KM From Home" />
+    <meta itemprop="name" content="5KM From Home" />
+    <meta itemprop="name" content="How far can we go" />
+
+    <meta
+      itemprop="description"
+      content="How far can we go from home during restrictions?"
+    />
+    <meta
+      name="twitter:description"
+      content="How far can we go from home during restrictions?"
+    />
+
+    <meta
+      name="twitter:image"
+      content="https://www.howfarcanwego.one/images/share-image.jpg"
+    />
+    <meta
+      itemprop="image"
+      content="https://www.howfarcanwego.one/images/share-image.jpg"
+    />
+    <meta
+      property="og:image"
+      content="https://www.howfarcanwego.one/images/share-image.jpg"
+    />
+
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link
       rel="stylesheet"
@@ -74,6 +117,20 @@
     </main>
     <div class="footer">
       <p>©2021 - Made by Dat Nguyen</p>
+      <div class="icon-from">
+        Icons made by
+        <a class="text-white" href="https://www.freepik.com" title="Freepik"
+          >Freepik</a
+        >
+        &
+        <a class="text-white" href="http://www.dariusdan.com" title="Darius Dan"
+          >Darius Dan</a
+        >
+        from
+        <a class="text-white" href="https://www.flaticon.com/" title="Flaticon"
+          >www.flaticon.com</a
+        >
+      </div>
     </div>
     <script>
       let map;
@@ -87,15 +144,15 @@
       let markers = [];
 
       const arr = {
-        100: 15,
-        200: 15,
-        300: 15,
+        100: 17,
+        200: 17,
+        300: 16,
         400: 15,
         500: 15,
         1000: 14,
         2000: 13,
         3000: 13,
-        4000: 13,
+        4000: 12,
         5000: 12,
         6000: 12,
         7000: 11,
@@ -161,11 +218,11 @@
               return;
             }
             const icon = {
-              // url: place.icon,
-              size: new google.maps.Size(71, 71),
+              url: "/images/home.png",
+              size: new google.maps.Size(80, 80),
               origin: new google.maps.Point(0, 0),
-              anchor: new google.maps.Point(17, 34),
-              scaledSize: new google.maps.Size(25, 25)
+              anchor: new google.maps.Point(17, 30),
+              scaledSize: new google.maps.Size(35, 35)
             };
             // Clear out the old markers.
             if (markerCenter != null) markerCenter.setMap(null);
@@ -173,7 +230,7 @@
             markerCenter = new google.maps.Marker({
               position: place.geometry.location,
               title: place.name,
-              label: "1",
+              icon: icon,
               map: map,
               draggable: true
             });
@@ -232,19 +289,19 @@
               return;
             }
             const icon = {
-              // url: place.icon,
-              size: new google.maps.Size(71, 71),
+              url: "/images/add.png",
+              strokeColor: "red",
+              size: new google.maps.Size(80, 80),
               origin: new google.maps.Point(0, 0),
-              anchor: new google.maps.Point(17, 34),
-              scaledSize: new google.maps.Size(25, 25)
+              anchor: new google.maps.Point(17, 30),
+              scaledSize: new google.maps.Size(50, 50)
             };
             // Create a marker for each place.
             markers2.push(
               new google.maps.Marker({
                 map,
                 title: place.name,
-                position: place.geometry.location,
-                label: "2"
+                position: place.geometry.location
               })
             );
 
@@ -265,7 +322,6 @@
 
       // Change radius
       function changeFunc(value) {
-        console.log(searchBox);
         if (places != null) {
           if (circle != null) circle.setMap(null);
           circle = new google.maps.Circle({
@@ -314,10 +370,11 @@
       }
       .h3 {
         margin-top: 10px !important;
+        font-weight: bold !important;
       }
 
       .z-depth-1-half {
-        height: 92%;
+        height: 91%;
       }
 
       .footer {
@@ -326,7 +383,10 @@
         text-align: center;
         font-size: 10px;
         padding: 2px;
-        height: 2%;
+        height: 3%;
+      }
+      .text-white {
+        color: white;
       }
       input[type="search"]::-webkit-search-cancel-button {
         -webkit-appearance: searchfield-cancel-button;
@@ -378,6 +438,13 @@
         *::-webkit-search-cancel-button {
           -webkit-appearance: searchfield-cancel-button;
         }
+        .icon-from {
+          margin-top: -13px !important;
+          font-size: 6px;
+        }
+      }
+      .icon-from {
+        margin-top: -14px;
       }
       @media only screen and (min-width: 800px) {
         /* For desktop: */
